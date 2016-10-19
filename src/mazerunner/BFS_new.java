@@ -44,10 +44,10 @@ public class BFS_new {
                 } else if (parsedMaze[m.y][m.x] == 'X' || parsedMaze[m.y][m.x] == 'U') {
                     // Wall or previous space, do nothing.
                 } else {
-                    System.out.println(m.y + " " + m.x + "-" + parsedMaze[m.y][m.x]);
+                   // System.out.println(m.y + " " + m.x + "-" + parsedMaze[m.y][m.x]);
                     parsedMaze[m.y][m.x] = 'U';
                     moves.addAll(m.getPotentialMoves());
-                    System.out.println(m.prev.size());
+                    //System.out.println(m.prev.size());
                 }
             }
         }
