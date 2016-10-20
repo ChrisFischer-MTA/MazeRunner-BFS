@@ -1,5 +1,14 @@
 package mazerunner;
 
+/*
+First write of the move class for this project.
+It's really not needed for practical purposes, but
+it's easier to read with this here.
+Christopher R. Fischer - 10/15/16
+Junior in High School
+Check license/usage terms @ christopherrfischer.me.
+*/
+
 import java.util.ArrayList;
 
 public class move extends Object {
@@ -9,17 +18,14 @@ public class move extends Object {
     ArrayList<move> prev = new ArrayList();
 
     public move(int y, int x) {
-        //System.out.println("Default constructor used!");
         this.y = y;
         this.x = x;
     }
 
     public move(int y, int x, ArrayList<move> previousmoves) {
-        this.y = y;
-        this.x = x;
+        super();
         previousmoves.add(new move(y, x));
         prev.addAll(previousmoves);
-       // System.out.println(x+" "+y);
     }
 
     public ArrayList<move> getPrev() {
@@ -27,22 +33,37 @@ public class move extends Object {
     }
 
     public ArrayList<move> getPotentialMoves() {
+        // See what moves are valid.
         ArrayList<move> moves = new ArrayList();
+
+        // This was put here for debugging purposes. It's purely cosmetic, so
+        // I'll be leaving it.
         if (prev.isEmpty()) {
             prev.add(new move(y, x));
         }
-        if (BFS_new.isMoveValid(y + 1, x)) {
-            moves.add(new move(y + 1, x, prev));
-        }
-        if (BFS_new.isMoveValid(y - 1, x)) {
-            moves.add(new move(y - 1, x, prev));
-        }
-        if (BFS_new.isMoveValid(y, x - 1)) {
+
+        // Checks if a space in relation to our point is valid, and if so it adds it to the queue.
+        
+        // Check right
+        if (BFS.isMoveValid(y, x - 1)) {
             moves.add(new move(y, x + 1, prev));
         }
-        if (BFS_new.isMoveValid(y, x + 1)) {
+
+        // Check left
+        if (BFS.isMoveValid(y, x + 1)) {
             moves.add(new move(y, x - 1, prev));
         }
-    return moves;
+
+        // Check above
+        if (BFS.isMoveValid(y + 1, x)) {
+            moves.add(new move(y + 1, x, prev));
+        }
+
+        // Check below
+        if (BFS.isMoveValid(y - 1, x)) {
+            moves.add(new move(y - 1, x, prev));
+        }
+
+        return moves;
     }
 }

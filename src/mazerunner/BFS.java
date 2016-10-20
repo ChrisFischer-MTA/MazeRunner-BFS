@@ -4,92 +4,116 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
+/*
+Second write of the BFS class for this project.
+Christopher R. Fischer - 10/15/16
+Junior in High School
+Check license/usage terms @ christopherrfischer.me.
+*/
+
 public class BFS {
 
-    static int sy;
-    static int sx;
-    static Queue<String> moves = new LinkedList<String>();
-    static ArrayList<String> moveArray = new ArrayList();
-    static char[][] translated;
+    // Queue holds up coming moves.
+    static Queue<move> moves = new LinkedList();
+
+    // Stores movable space.
+    static char[][] parsedMaze;
+
+    // Important Points
+    static int starty;
+    static int startx;
 
     public static char[][] runBFS(char[][] trans) {
-        translated = trans;
-        findFinish(translated);
-        findStart(translated);
-        move(sy, sx);
-        while (!moves.isEmpty()) {
-            String move = moves.remove();
-            //System.out.println(move);
-            String[] x = move.split(",");
-            int zy = Integer.parseInt(x[0]);
-            int zx = Integer.parseInt(x[1]);
-            //System.out.println();
-            //System.out.println(move.length());
-            //System.out.println(move);
-            //System.out.println(translated[zy][zx]);
-            if (!moveArray.contains(move)) {
-                moveArray.add(move);
-                move(zy, zx);
-            } else {
-
-            }
-            // Return modified array
-
+        parsedMaze = trans;
+        // Make sure that a start and finish exist.
+        if (!endPointsExist()) {
+            System.out.println("Missing an endpoint.");
+            return parsedMaze;
         }
-        return translated;
+
+        // Start first.
+        move move = new move(starty, startx);
+
+        // Here for debugging.
+        System.out.println(move.getPotentialMoves().size());
+
+        // Assign the starting moves to the queue.
+        moves.addAll(move.getPotentialMoves());
+
+        // Main loop!
+        while (!moves.isEmpty()) {
+            move m = moves.poll();
+            if (isMoveValid(m.y, m.x)) {
+                switch (parsedMaze[m.y][m.x]) {
+                    case 'F':
+                // This is the finish, act accordingly.
+                        System.out.println("Move found!");
+                // Let's go back and highlight the route to get to the finish, and be sure to clear the stack of all the moves.
+                        highlightPath(m);
+                        moves.clear();
+                        break;
+                // Wall or previous space, do nothing.
+                    case 'X':
+                    case 'U':
+                        break;
+                // Moveable space!
+                    default:
+                        // Mark it as "has been here before".
+                        parsedMaze[m.y][m.x] = 'U';
+                        // Add all the potenital moves.
+                        moves.addAll(m.getPotentialMoves());
+                        break;
+                }
+            }
+        }
+        return parsedMaze;
     }
 
-    public static void findStart(char[][] translated) {
+    public static void highlightPath(move m) {
+        // Get previous moves.
+        ArrayList<move> previous = m.getPrev();
+        // I love the half-recursion(ness) of this solution :)
+
+        // Loop through and highlight each move.
+        for (int i = 0; i < previous.size(); i++) {
+            parsedMaze[previous.get(i).y][previous.get(i).x] = 'L';
+            
+            // We can print out the path for fun, but this is disabled in the final release.
+            // System.out.println(previous.get(i).y+ " " +previous.get(i).x);
+        }
+    }
+
+    public static boolean endPointsExist() {
+        // I know I can eliminate this super easy, but this is simple.
+        return findFinish(parsedMaze) && findStart(parsedMaze);
+    }
+
+    public static boolean findStart(char[][] translated) {
         for (int i = 0; i < translated.length; i++) {
             for (int j = 0; j < translated[0].length; j++) {
                 if (translated[i][j] == 'S') {
-                    sy = i;
-                    sx = j;
+                    starty = i;
+                    startx = j;
+                    return true;
                 }
             }
         }
+        return false;
     }
 
-    public static void findFinish(char[][] translated) {
+    public static boolean findFinish(char[][] translated) {
         for (int i = 0; i < translated.length; i++) {
             for (int j = 0; j < translated[0].length; j++) {
                 if (translated[i][j] == 'F') {
-                    System.out.println(i + " " + j);
+                    return true;
+
                 }
             }
         }
+        return false;
     }
 
-    public static void move(int y, int x) {
-        if (translated[y][x] == 'F') {
-            System.out.println("Finish - " + y + "" + x);
-            moves.clear();
-        } else if (translated[y][x] == 'S') {
-            genMove(y, x);
-        } else if (translated[y][x] == '.') {
-            translated[y][x] = 'U';
-            genMove(y, x);
-        } else {
-// Assume its a wall
-        }
-    }
-
-    public static void genMove(int y, int x) {
-        if (isValid(y + 1, x)) {
-            moves.add("" + (y + 1) + ',' + x);
-        }
-        if (isValid(y - 1, x)) {
-            moves.add("" + (y - 1) + ',' + x);
-        }
-        if (isValid(y, x - 1)) {
-            moves.add("" + y + ',' + (x - 1));
-        }
-        if (isValid(y, x + 1)) {
-            moves.add("" + y + ',' + (x + 1));
-        }
-    }
-
-    public static boolean isValid(int y, int x) {
+    public static boolean isMoveValid(int y, int x) {
         if (y < 0) {
             return false;
         }
@@ -98,15 +122,17 @@ public class BFS {
             return false;
         }
 
-        if (y > translated.length - 1) {
+        if (y > parsedMaze.length - 1) {
             return false;
         }
 
-        if (x > translated[0].length - 1) {
+        if (x > parsedMaze[0].length - 1) {
             return false;
-        } //if(translated[y][x] == '.')
-        else {
+        }
+        if (parsedMaze[y][x] == '.' || parsedMaze[y][x] == 'U' || parsedMaze[y][x] == 'F') {
             return true;
+        } else {
+            return false;
         }
     }
 }

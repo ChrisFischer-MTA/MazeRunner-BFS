@@ -9,7 +9,7 @@ public class MazeRunner {
 
     public static void main(String[] args) throws IOException {
         Image input = new Image("input.png");
-        char[][] te = BFS_new.runBFS(input.translated);
+        char[][] te = BFS.runBFS(input.translated);
         createImage(te);
     }
 
